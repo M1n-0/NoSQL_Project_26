@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration — FabLab Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo"><span class="dot"></span> FabLab Manager</div>
+    <div class="role-tag">Espace admin</div>
+    <a class="nav-item active" href="admin.html"><span class="ic">⌂</span> Tableau de bord</a>
+    <a class="nav-item" href="admin-magasins.html"><span class="ic">⬚</span> Magasins</a>
+    <a class="nav-item" href="admin-groupes.html"><span class="ic">⬡</span> Groupes</a>
+    <div class="spacer"></div>
+    <div class="user-card">
+      <div class="avatar">AD</div>
+      <div><span>Administrateur</span><br><span style="opacity:.7;font-size:11.5px;">Admin</span></div>
+    </div>
+  </div>
+
+  <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+    <div class="mtopbar">
+      <div class="logo"><span class="dot"></span> FabLab Manager</div>
+      <div class="avatar" style="background:var(--rose-soft);">AD</div>
+    </div>
+
+    <div class="main">
+      <div class="page-header">
+        <div>
+          <h1>Tableau de bord</h1>
+          <div class="sub">Gestion de tous les comptes</div>
+        </div>
+        <button class="btn btn-primary" id="btn-create">+ Créer un compte</button>
+      </div>
+
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="Rechercher par e-mail…">
+        <div class="filter-btns">
+          <button class="filter-btn active" data-role="">Tous</button>
+          <button class="filter-btn" data-role="admin">Admin</button>
+          <button class="filter-btn" data-role="commercant">Commerçants</button>
+          <button class="filter-btn" data-role="client">Clients</button>
+        </div>
+      </div>
+
+      <!-- TODO (backend) : GET /api/admin/users -->
+      <div class="card" id="users-zone">
+        <div class="empty-state"><div class="ic">👥</div>Chargement des comptes...</div>
+      </div>
+    </div>
+
+    <div class="mbottombar">
+      <a class="mtab active" href="admin.html"><span class="ic">⌂</span>Bord</a>
+      <a class="mtab" href="admin-magasins.html"><span class="ic">⬚</span>Magasins</a>
+      <a class="mtab" href="admin-groupes.html"><span class="ic">⬡</span>Groupes</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modale création de compte -->
+<div class="modal-overlay hidden" id="modal-create">
+  <div class="modal">
+    <h2>Créer un compte</h2>
+    <p class="sub">Le mot de passe temporaire sera affiché et envoyé à l'utilisateur pour modification.</p>
+    <div class="field">
+      <label for="new-email">Adresse e-mail</label>
+      <input type="email" id="new-email" required>
+    </div>
+    <div class="field">
+      <label>Rôle</label>
+      <select id="new-role" class="select-field">
+        <option value="client">Client</option>
+        <option value="commercant">Commerçant</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Groupe d'affiliation (facultatif)</label>
+      <select id="new-group" class="select-field">
+        <option value="">— Aucun groupe —</option>
+      </select>
+    </div>
+    <div id="created-pwd-zone" style="display:none;">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">Mot de passe temporaire généré :</div>
+      <div class="generated-pwd" id="created-pwd"></div>
+      <div style="font-size:12px;color:var(--ink-soft);">📧 Un e-mail sera envoyé à l'utilisateur pour le modifier.</div>
+    </div>
+    <div id="create-error" style="font-size:13px;color:var(--danger);display:none;margin-top:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-modal-cancel">Fermer</button>
+      <button class="btn btn-primary btn-sm" id="btn-modal-submit">Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale confirmation suppression -->
+<div class="modal-overlay hidden" id="modal-delete">
+  <div class="modal">
+    <h2>Supprimer ce compte ?</h2>
+    <p class="sub" id="delete-email-label">Cette action est irréversible.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-delete-cancel">Annuler</button>
+      <button class="btn btn-sm" id="btn-delete-confirm" style="background:var(--danger);color:#fff;">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

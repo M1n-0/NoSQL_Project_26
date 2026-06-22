@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magasins — FabLab Manager Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo"><span class="dot"></span> FabLab Manager</div>
+    <div class="role-tag">Espace admin</div>
+    <a class="nav-item" href="admin.html"><span class="ic">⌂</span> Tableau de bord</a>
+    <a class="nav-item active" href="admin-magasins.html"><span class="ic">⬚</span> Magasins</a>
+    <a class="nav-item" href="admin-groupes.html"><span class="ic">⬡</span> Groupes</a>
+    <div class="spacer"></div>
+    <div class="user-card">
+      <div class="avatar">AD</div>
+      <div><span>Administrateur</span><br><span style="opacity:.7;font-size:11.5px;">Admin</span></div>
+    </div>
+  </div>
+
+  <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+    <div class="mtopbar">
+      <div class="logo"><span class="dot"></span> FabLab Manager</div>
+      <div class="avatar" style="background:var(--rose-soft);">AD</div>
+    </div>
+
+    <div class="main">
+      <div class="page-header">
+        <div>
+          <h1>Magasins</h1>
+          <div class="sub">Associez les magasins à des comptes ou des groupes</div>
+        </div>
+      </div>
+
+      <!-- TODO (backend) : GET /api/admin/shops -->
+      <div class="card" id="shops-zone">
+        <div class="empty-state"><div class="ic">🏭</div>Chargement des magasins...</div>
+      </div>
+    </div>
+
+    <div class="mbottombar">
+      <a class="mtab" href="admin.html"><span class="ic">⌂</span>Bord</a>
+      <a class="mtab active" href="admin-magasins.html"><span class="ic">⬚</span>Magasins</a>
+      <a class="mtab" href="admin-groupes.html"><span class="ic">⬡</span>Groupes</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modale liaison magasin -->
+<div class="modal-overlay hidden" id="modal-link">
+  <div class="modal">
+    <h2>Associer ce magasin</h2>
+    <p class="sub" id="link-shop-label">Choisissez un compte ou un groupe à lier</p>
+    <div class="field">
+      <label>Lier à</label>
+      <select id="link-type" class="select-field">
+        <option value="user">Un compte individuel</option>
+        <option value="group">Un groupe entier</option>
+      </select>
+    </div>
+    <div class="field" id="link-user-field">
+      <label>Compte</label>
+      <select id="link-user-select" class="select-field">
+        <option value="">Chargement...</option>
+      </select>
+    </div>
+    <div class="field" id="link-group-field" style="display:none;">
+      <label>Groupe</label>
+      <select id="link-group-select" class="select-field">
+        <option value="">Chargement...</option>
+      </select>
+    </div>
+    <div id="link-error" style="font-size:13px;color:var(--danger);display:none;margin-top:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-link-cancel">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="btn-link-submit">Associer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

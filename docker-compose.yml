@@ -1,0 +1,61 @@
+# ===========================================================
+# FabLab Manager — infrastructure des 4 bases de données
+# Squelette de départ pour l'équipe BDD : à compléter avec les
+# volumes de seed, les variables d'environnement définitives,
+# et tout réglage spécifique à chaque base.
+# ===========================================================
+
+version: "3.9"
+
+services:
+  sql:
+    image: postgres:16
+    container_name: fablab_sql
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fablab
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: fablab_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - sql_data:/var/lib/postgresql/data
+      # - ./seed/sql:/docker-entrypoint-initdb.d   # TODO (équipe BDD) : scripts de seed SQL
+
+  mongo:
+    image: mongo:8
+    container_name: fablab_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      # - ./seed/mongo:/docker-entrypoint-initdb.d   # TODO (équipe BDD) : scripts de seed Mongo
+
+  redis:
+    image: redis:8
+    container_name: fablab_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  neo4j:
+    image: neo4j:2025.06
+    container_name: fablab_neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/changeme
+    ports:
+      - "7474:7474" # interface web
+      - "7687:7687" # bolt
+    volumes:
+      - neo4j_data:/data
+      # - ./seed/neo4j:/import   # TODO (équipe BDD) : fichiers à importer via LOAD CSV / Cypher
+
+volumes:
+  sql_data:
+  mongo_data:
+  redis_data:
+  neo4j_data:
