@@ -8,10 +8,10 @@
 const state = { step: 1, shopId: null, shopName: null, wantSeat: true, wantMachine: true };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadShops();
 
@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadShops() {
   const zone = document.getElementById("shops-list");
   try {
-    // TODO (backend) : GET /api/shops — liste de tous les magasins disponibles
     const shops = await api.getShops();
     if (!shops || shops.length === 0) {
       zone.innerHTML = `<div class="empty-state"><div class="ic">🏭</div>Aucun magasin disponible.</div>`;
@@ -73,7 +72,6 @@ async function loadMachines() {
   const zone = document.getElementById("machines-list");
   zone.innerHTML = `<div class="empty-state card"><div class="ic">🔧</div>Chargement...</div>`;
   try {
-    // TODO (backend) : GET /api/machines?shopId=:id — machines du magasin sélectionné
     const machines = await api.getMachinesForShop(state.shopId);
     const available = machines ? machines.filter(m => m.status === "available") : [];
     if (available.length === 0) {
@@ -96,10 +94,8 @@ async function loadMachines() {
 async function selectMachine(machineId, machineName) {
   try {
     if (state.wantSeat) {
-      // TODO (backend) : POST /api/shops/:id/seat
       await api.takeShopSeat(state.shopId);
     }
-    // TODO (backend) : POST /api/machines/:id/reserve
     await api.reserveMachine(machineId);
     document.getElementById("confirm-machine").textContent = machineName;
     document.getElementById("confirm-shop").textContent = state.shopName;
@@ -112,7 +108,6 @@ async function selectMachine(machineId, machineName) {
 async function confirmOrderWithoutMachine() {
   try {
     if (state.wantSeat) {
-      // TODO (backend) : POST /api/shops/:id/seat
       await api.takeShopSeat(state.shopId);
     }
     document.getElementById("confirm-machine").textContent = "Place réservée";

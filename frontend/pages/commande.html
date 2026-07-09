@@ -52,7 +52,6 @@
       <!-- Étape 1 : choisir un magasin -->
       <div id="step-1">
         <div class="section-title">Choisir un magasin</div>
-        <!-- TODO (backend) : GET /api/shops -->
         <div class="card" id="shops-list">
           <div class="empty-state"><div class="ic">🏭</div>Chargement...</div>
         </div>
@@ -84,7 +83,6 @@
       <!-- Étape 3 : choisir une machine -->
       <div id="step-3" style="display:none;">
         <div class="section-title">Choisir une machine disponible</div>
-        <!-- TODO (backend) : GET /api/machines?shopId=:id -->
         <div id="machines-list">
           <div class="empty-state card"><div class="ic">🔧</div>Chargement des machines...</div>
         </div>
@@ -120,6 +118,7 @@
 </div>
 
 <script src="../js/api.js"></script>
+<script src="../js/session.js"></script>
 <script src="../js/commande.js"></script>
 </body>
 </html>

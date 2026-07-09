@@ -5,10 +5,10 @@
    =========================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // const role  = localStorage.getItem("fablab_role");
-  // if (!token || role !== "admin") { window.location.href = "login.html"; return; }
+  if (!localStorage.getItem("fablab_token") || localStorage.getItem("fablab_role") !== "admin") {
+    window.location.href = "login.html";
+    return;
+  }
 
   if (document.getElementById("users-zone"))  await initDashboard();
   if (document.getElementById("groups-zone")) await initGroupes();
@@ -46,7 +46,6 @@ async function initDashboard() {
 async function loadUsers() {
   const zone = document.getElementById("users-zone");
   try {
-    // TODO (backend) : GET /api/admin/users
     allUsers = await api.adminGetUsers("");
     renderUsers(allUsers);
   } catch {
@@ -114,7 +113,6 @@ async function submitCreateUser() {
     return;
   }
   try {
-    // TODO (backend) : POST /api/admin/users — renvoie { id, email, role, temporaryPassword }
     const result = await api.adminCreateUser({ email, role, groupId: groupId || null });
     document.getElementById("created-pwd").textContent = result.temporaryPassword;
     document.getElementById("created-pwd-zone").style.display = "block";
@@ -134,7 +132,6 @@ function openDeleteModal(userId, email) {
 
 async function confirmDelete() {
   try {
-    // TODO (backend) : DELETE /api/admin/users/:id
     await api.adminDeleteUser(currentDeleteId);
     document.getElementById("modal-delete").classList.add("hidden");
     await loadUsers();
@@ -184,7 +181,6 @@ async function initGroupes() {
 async function loadGroups() {
   const zone = document.getElementById("groups-zone");
   try {
-    // TODO (backend) : GET /api/admin/groups
     const groups = await api.adminGetGroups();
     if (!groups || groups.length === 0) {
       zone.innerHTML = `<div class="empty-state"><div class="ic">⬡</div>Aucun groupe créé.</div>`;
@@ -218,7 +214,6 @@ async function submitCreateGroup() {
     return;
   }
   try {
-    // TODO (backend) : POST /api/admin/groups
     await api.adminCreateGroup({ name });
     document.getElementById("modal-create-group").classList.add("hidden");
     await loadGroups();
@@ -236,7 +231,6 @@ async function openAddMember(groupId, groupName) {
   select.innerHTML = `<option value="">Chargement...</option>`;
   document.getElementById("modal-add-member").classList.remove("hidden");
   try {
-    // TODO (backend) : GET /api/admin/users
     const users = await api.adminGetUsers("");
     select.innerHTML = users.map(u => `<option value="${u.id}">${u.email} (${u.role})</option>`).join("");
   } catch {
@@ -254,7 +248,6 @@ async function submitAddMember() {
     return;
   }
   try {
-    // TODO (backend) : POST /api/admin/groups/:id/members
     await api.adminAddGroupMember(currentGroupId, { userId });
     document.getElementById("modal-add-member").classList.add("hidden");
     await loadGroups();
@@ -286,7 +279,6 @@ async function initMagasins() {
 async function loadAdminShops() {
   const zone = document.getElementById("shops-zone");
   try {
-    // TODO (backend) : GET /api/admin/shops
     const shops = await api.adminGetAllShops();
     if (!shops || shops.length === 0) {
       zone.innerHTML = `<div class="empty-state"><div class="ic">🏭</div>Aucun magasin trouvé.</div>`;
@@ -348,7 +340,6 @@ async function submitLinkShop() {
     ? { userId:  document.getElementById("link-user-select").value }
     : { groupId: document.getElementById("link-group-select").value };
   try {
-    // TODO (backend) : POST /api/admin/shops/:id/link
     await api.adminLinkShop(currentLinkShopId, body);
     document.getElementById("modal-link").classList.add("hidden");
     await loadAdminShops();

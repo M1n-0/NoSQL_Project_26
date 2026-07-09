@@ -5,10 +5,10 @@
 let currentShopId = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadShops();
 
@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadShops() {
   const zone = document.getElementById("shops-zone");
   try {
-    // TODO (backend) : GET /api/shops/mine — magasins associés au compte client
     const shops = await api.getMyLinkedShops();
     if (!shops || shops.length === 0) {
       zone.innerHTML = `<div class="empty-state"><div class="ic">🏭</div>Aucun magasin associé à votre compte.</div>`;
@@ -77,7 +76,6 @@ async function submitOnlineResa() {
     return;
   }
   try {
-    // TODO (backend) : POST /api/shops/:id/reserve-online
     await api.reserveOnline(currentShopId, { start, end, material });
     feedback.style.display = "block";
     document.getElementById("btn-modal-confirm").style.display = "none";

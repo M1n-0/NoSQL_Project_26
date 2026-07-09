@@ -1,32 +1,21 @@
 /* ===========================================================
    FabLab Manager — logique de la page client
-   Ce fichier va chercher les données réelles une fois que le
-   backend (et les bases) seront branchés. En attendant, il
-   affiche un état vide / de chargement propre.
    =========================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadCurrentReservation();
   await loadShops();
   await loadHistory();
-
-  document.getElementById("btn-new-order").addEventListener("click", () => {
-    // TODO : ouvrir le flux "Passer commande"
-    // (choix du magasin -> réservation -> sélection machine)
-    alert("Flux de commande à implémenter (choix du magasin → réservation → sélection matériel).");
-  });
 });
 
 async function loadCurrentReservation() {
   const zone = document.getElementById("current-reservation-zone");
   try {
-    // TODO (backend) : GET /api/reservations/me
-    // Réponse attendue : { hasActive: bool, itemName, shopName, status, daysLeft, ... } | null
     const data = await api.getMyReservations();
 
     if (!data || !data.hasActive) {
@@ -44,9 +33,18 @@ async function loadCurrentReservation() {
         <div class="item-name">${data.itemName}</div>
         <span class="pill pill-warn">${data.status}</span>
         <div class="meta">
-          <div><b>${data.daysLeft}</b>avant restitution</div>
-          <div><b>${data.shopName}</b>magasin</div>
+          ${data.daysLeft ? `<div><b>${data.daysLeft}</b> avant restitution</div>` : ""}
+          <div><b>${data.shopName}</b> magasin</div>
         </div>
+        ${data.rawStatus === "en_attente" ? `
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2);">
+            <div class="label">DURÉE D'IMPRESSION PRÉVUE</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <input type="number" id="duration-input" min="1" placeholder="Minutes"
+                style="flex:1;padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-family:'Work Sans',sans-serif;font-size:14px;">
+              <button class="btn btn-soft btn-sm" onclick="submitPrintDuration('${data.id}')">Valider</button>
+            </div>
+          </div>` : ""}
       </div>`;
   } catch (err) {
     zone.innerHTML = `<div class="empty-state card">Impossible de charger vos réservations.</div>`;
@@ -57,8 +55,6 @@ async function loadCurrentReservation() {
 async function loadShops() {
   const zone = document.getElementById("shops-zone");
   try {
-    // TODO (backend) : GET /api/shops
-    // Réponse attendue : liste de { id, name, isOpen, closesAt, seatsTaken, seatsMax }
     const shops = await api.getShops();
 
     if (!shops || shops.length === 0) {
@@ -97,13 +93,52 @@ async function loadShops() {
 
 async function loadHistory() {
   const zone = document.getElementById("history-zone");
-  // TODO (backend) : GET /api/reservations/me/history
-  zone.innerHTML = `<div class="empty-state"><div class="ic">▤</div>Aucun historique pour le moment.</div>`;
+  try {
+    const history = await api.getMyFullHistory();
+    if (!history || history.length === 0) {
+      zone.innerHTML = `<div class="empty-state"><div class="ic">▤</div>Aucun historique pour le moment.</div>`;
+      return;
+    }
+    zone.innerHTML = `
+      <table class="occ-table">
+        <tr>
+          <th>Machine / Matériel</th>
+          <th>Magasin</th>
+          <th>Date</th>
+          <th>Durée</th>
+          <th>Statut</th>
+        </tr>
+        ${history.slice(0, 5).map(r => `
+          <tr>
+            <td style="font-weight:600;">${r.itemName}</td>
+            <td>${r.shopName}</td>
+            <td>${formatDate(r.date)}</td>
+            <td>${r.duration || "—"}</td>
+            <td><span class="pill ${r.statusClass || "pill-muted"}">${r.status}</span></td>
+          </tr>`).join("")}
+      </table>`;
+  } catch {
+    zone.innerHTML = `<div class="empty-state">Impossible de charger l'historique.</div>`;
+  }
+}
+
+async function submitPrintDuration(reservationId) {
+  const input = document.getElementById("duration-input");
+  const minutes = parseInt(input.value, 10);
+  if (!minutes || minutes <= 0) {
+    alert("Merci d'indiquer une durée valide.");
+    return;
+  }
+  try {
+    await api.setPrintDuration(reservationId, minutes);
+    await loadCurrentReservation();
+  } catch (err) {
+    alert("Impossible d'enregistrer la durée : " + err.message);
+  }
 }
 
 async function reserveSeat(shopId) {
   try {
-    // TODO (backend) : POST /api/shops/:id/seat
     await api.takeShopSeat(shopId);
     await loadShops();
   } catch (err) {
