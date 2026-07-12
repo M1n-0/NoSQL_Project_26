@@ -63,7 +63,7 @@ Mot de passe pour tous les comptes seedés : `password123`
 | admin | admin@fablab.io |
 | commerçant | fablab.bx@fablab.io |
 | commerçant | fablab.lh@fablab.io |
-| client | erik.lebus@mail.io |
+| client | tom.martin@mail.io |
 
 ### Développement local (sans Docker)
 
