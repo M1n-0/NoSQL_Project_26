@@ -1,11 +1,7 @@
 /* ===========================================================
    Connexion Redis
-   À COMPLÉTER PAR L'ÉQUIPE BASES DE DONNÉES.
-
-   Usage prévu ailleurs dans le code :
-     const { redisClient } = require("../config/redis.config");
-     await redisClient.set(`machine:${id}:status`, "reserved", { EX: 1200 }); // TTL 20 min
-     const status = await redisClient.get(`machine:${id}:status`);
+   La connexion effective (redisClient.connect()) est faite au
+   démarrage du serveur, voir server.js.
    =========================================================== */
 
 const { createClient } = require("redis");
@@ -15,11 +11,9 @@ const redisClient = createClient({
     host: process.env.REDIS_HOST || "localhost",
     port: process.env.REDIS_PORT || 6379,
   },
+  password: process.env.REDIS_PASSWORD,
 });
 
 redisClient.on("error", (err) => console.error("Erreur Redis :", err));
-
-// TODO (équipe BDD) : se connecter au démarrage du serveur :
-// redisClient.connect();
 
 module.exports = { redisClient };

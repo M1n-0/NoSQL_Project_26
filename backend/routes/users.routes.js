@@ -5,28 +5,55 @@
 
 const express = require("express");
 const router = express.Router();
-// const { sqlPool } = require("../config/sql.config");
-// const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
+const { sqlPool } = require("../config/sql.config");
+const { asyncHandler } = require("../utils/async-handler");
 
 // GET /api/users/me -> profil de l'utilisateur connecté
-router.get("/me", async (req, res) => {
-  // TODO (équipe BDD) : SELECT id, email, role FROM users WHERE id = req.user.id
-  // (req.user est injecté par le middleware JWT une fois branché)
-  res.json({
-    id: "u1",
-    email: "utilisateur@example.com",
-    role: "client",
-  });
-});
+router.get(
+  "/me",
+  asyncHandler(async (req, res) => {
+    const [rows] = await sqlPool.query(
+      "SELECT id, email, role, nom, prenom FROM users WHERE id = ?",
+      [req.user.id]
+    );
+    const user = rows[0];
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable." });
+
+    res.json({
+      id: String(user.id),
+      email: user.email,
+      role: user.role,
+      nom: user.nom,
+      prenom: user.prenom,
+    });
+  })
+);
 
 // PATCH /api/users/me -> modification de l'email et/ou du mot de passe
-router.patch("/me", async (req, res) => {
-  const { email, currentPassword, newPassword } = req.body;
-  // TODO (équipe BDD) :
-  // - si email fourni    : UPDATE users SET email = $1 WHERE id = req.user.id
-  // - si newPassword     : vérifier currentPassword via bcrypt.compare(),
-  //   puis UPDATE users SET password_hash = bcrypt.hash(newPassword, 10) WHERE id = req.user.id
-  res.json({ message: "Profil mis à jour (stub)." });
-});
+router.patch(
+  "/me",
+  asyncHandler(async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+
+    const [rows] = await sqlPool.query("SELECT * FROM users WHERE id = ?", [req.user.id]);
+    const user = rows[0];
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable." });
+
+    if (newPassword) {
+      if (!currentPassword || !(await bcrypt.compare(currentPassword, user.password_hash))) {
+        return res.status(401).json({ message: "Mot de passe actuel incorrect." });
+      }
+      const hash = await bcrypt.hash(newPassword, 10);
+      await sqlPool.query("UPDATE users SET password_hash = ? WHERE id = ?", [hash, req.user.id]);
+    }
+
+    if (email) {
+      await sqlPool.query("UPDATE users SET email = ? WHERE id = ?", [email, req.user.id]);
+    }
+
+    res.json({ message: "Profil mis à jour." });
+  })
+);
 
 module.exports = router;

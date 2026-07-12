@@ -1,32 +1,36 @@
 /* ===========================================================
    Routes /api/auth
-   Backend réel : vérifier l'utilisateur en base SQL (table users),
-   comparer le mot de passe haché, puis générer un JWT contenant
-   { id, role }.
+   Vérifie l'utilisateur en base SQL (table users), compare le
+   mot de passe haché, puis génère un JWT contenant { id, role }.
    =========================================================== */
 
 const express = require("express");
 const router = express.Router();
-// const { sqlPool } = require("../config/sql.config");
-// const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { sqlPool } = require("../config/sql.config");
+const { asyncHandler } = require("../utils/async-handler");
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+router.post(
+  "/login",
+  asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
 
-  // TODO (équipe BDD) : remplacer ce bloc par une vraie vérification SQL :
-  //   const result = await sqlPool.query("SELECT * FROM users WHERE email = $1", [email]);
-  //   ... vérifier le mot de passe (bcrypt) ...
-  //   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email et mot de passe requis." });
+    }
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email et mot de passe requis." });
-  }
+    const [rows] = await sqlPool.query("SELECT * FROM users WHERE email = ?", [email]);
+    const user = rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json({ message: "Identifiants invalides." });
+    }
 
-  // Bouchon temporaire pour permettre de tester le frontend sans base branchée :
-  const role = email.includes("admin") ? "admin"
-    : email.includes("commercant") ? "commercant"
-    : "client";
-  return res.json({ token: "fake-token-a-remplacer", role });
-});
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "8h",
+    });
+    res.json({ token, role: user.role });
+  })
+);
 
 module.exports = router;

@@ -1,11 +1,5 @@
 /* ===========================================================
    Connexion MongoDB
-   À COMPLÉTER PAR L'ÉQUIPE BASES DE DONNÉES.
-
-   Usage prévu ailleurs dans le code :
-     const { getMongoDb } = require("../config/mongo.config");
-     const db = await getMongoDb();
-     const machines = await db.collection("machine_sheets").find().toArray();
    =========================================================== */
 
 const { MongoClient } = require("mongodb");
