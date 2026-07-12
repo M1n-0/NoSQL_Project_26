@@ -46,8 +46,6 @@
     const password = document.getElementById("password").value;
 
     try {
-      // TODO (backend) : /api/auth/login doit vérifier les identifiants
-      // en base SQL et renvoyer { token, role: "client" | "commercant" | "admin" }
       const { token, role } = await api.login(email, password);
       localStorage.setItem("fablab_token", token);
       localStorage.setItem("fablab_role", role);

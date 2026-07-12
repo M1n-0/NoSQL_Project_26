@@ -3,10 +3,10 @@
    =========================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadShopInfo();
   await loadHistory();
@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadShopInfo() {
   try {
-    // TODO (backend) : GET /api/shops/me
     const shop = await api.getMyShop();
     document.getElementById("shop-subtitle").textContent = `${shop.name} · ${shop.hours}`;
     document.getElementById("shop-name-sidebar").textContent = shop.name;
@@ -29,7 +28,6 @@ async function loadShopInfo() {
 async function loadHistory() {
   const zone = document.getElementById("history-zone");
   try {
-    // TODO (backend) : GET /api/reservations/shop/history
     const history = await api.getMerchantHistory();
     if (!history || history.length === 0) {
       zone.innerHTML = `<div class="empty-state"><div class="ic">▤</div>Aucun historique pour le moment.</div>`;
@@ -43,6 +41,7 @@ async function loadHistory() {
           <th>Date</th>
           <th>Durée</th>
           <th>Statut</th>
+          <th></th>
         </tr>
         ${history.map(r => `
           <tr>
@@ -53,12 +52,28 @@ async function loadHistory() {
               </div>
             </td>
             <td style="font-weight:600;">${r.machineName}</td>
-            <td>${r.date}</td>
+            <td>${formatDate(r.date)}</td>
             <td>${r.duration || "—"}</td>
             <td><span class="pill ${r.statusClass || "pill-muted"}">${r.status}</span></td>
+            <td>
+              ${r.rawStatus === "en_attente" ? `
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-soft btn-sm" onclick="setReservationStatus('${r.id}','confirmee')">Valider</button>
+                  <button class="btn btn-ghost btn-sm" onclick="setReservationStatus('${r.id}','annulee')">Annuler</button>
+                </div>` : ""}
+            </td>
           </tr>`).join("")}
       </table>`;
   } catch {
     zone.innerHTML = `<div class="empty-state">Impossible de charger l'historique.</div>`;
+  }
+}
+
+async function setReservationStatus(reservationId, status) {
+  try {
+    await api.updateReservationStatus(reservationId, status);
+    await loadHistory();
+  } catch (err) {
+    alert("Impossible de mettre à jour la réservation : " + err.message);
   }
 }

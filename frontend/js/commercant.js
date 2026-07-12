@@ -3,32 +3,32 @@
    =========================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadShopInfo();
   await loadOccupancy();
   await loadMachines();
 
   document.getElementById("shop-settings-form").addEventListener("submit", saveShopSettings);
-  document.getElementById("btn-add-machine").addEventListener("click", () => {
-    // TODO : ouvrir une modale d'ajout de machine (nom, fonction, statut)
-    alert("Formulaire d'ajout de machine à implémenter.");
+  document.getElementById("btn-add-machine").addEventListener("click", openAddMachineModal);
+  document.getElementById("btn-machine-cancel").addEventListener("click", () => {
+    document.getElementById("modal-add-machine").classList.add("hidden");
   });
+  document.getElementById("btn-machine-submit").addEventListener("click", submitAddMachine);
 });
 
 async function loadShopInfo() {
   try {
-    // TODO (backend) : GET /api/shops/me
-    // Réponse attendue : { name, hours, capacity, contact }
     const shop = await api.getMyShop();
 
     document.getElementById("shop-subtitle").textContent = `${shop.name} · ${shop.hours}`;
     document.getElementById("shop-name-sidebar").textContent = shop.name;
     document.getElementById("setting-capacity").value = shop.capacity;
-    document.getElementById("setting-hours").value = shop.hours;
+    document.getElementById("setting-open-time").value = shop.openTime;
+    document.getElementById("setting-close-time").value = shop.closeTime;
     document.getElementById("setting-contact").value = shop.contact;
   } catch (err) {
     document.getElementById("shop-subtitle").textContent = "Impossible de charger les informations.";
@@ -39,8 +39,6 @@ async function loadShopInfo() {
 async function loadOccupancy() {
   const zone = document.getElementById("occupancy-zone");
   try {
-    // TODO (backend) : GET /api/shops/me/occupancy
-    // Réponse attendue : { current, max, people: [{ name, reserving }] }
     const occ = await api.getCurrentOccupancy();
 
     if (!occ || occ.people.length === 0) {
@@ -74,8 +72,6 @@ async function loadOccupancy() {
 async function loadMachines() {
   const zone = document.getElementById("machines-zone");
   try {
-    // TODO (backend) : GET /api/machines/me
-    // Réponse attendue : liste de { id, name, function, status: "available"|"busy"|"maintenance", statusLabel }
     const machines = await api.getMyMachines();
 
     if (!machines || machines.length === 0) {
@@ -103,15 +99,44 @@ async function loadMachines() {
 async function saveShopSettings(e) {
   e.preventDefault();
   try {
-    // TODO (backend) : PATCH /api/shops/me
     await api.updateMyShop({
       capacity: document.getElementById("setting-capacity").value,
-      hours: document.getElementById("setting-hours").value,
+      openTime: document.getElementById("setting-open-time").value,
+      closeTime: document.getElementById("setting-close-time").value,
       contact: document.getElementById("setting-contact").value,
     });
     await loadShopInfo();
   } catch (err) {
     alert("Impossible d'enregistrer : " + err.message);
+  }
+}
+
+function openAddMachineModal() {
+  document.getElementById("machine-name").value = "";
+  document.getElementById("machine-function").value = "";
+  document.getElementById("machine-reservation-type").value = "instantanee";
+  document.getElementById("machine-error").style.display = "none";
+  document.getElementById("modal-add-machine").classList.remove("hidden");
+}
+
+async function submitAddMachine() {
+  const name = document.getElementById("machine-name").value;
+  const fn = document.getElementById("machine-function").value;
+  const reservationType = document.getElementById("machine-reservation-type").value;
+  const errorEl = document.getElementById("machine-error");
+  errorEl.style.display = "none";
+  if (!name || !fn) {
+    errorEl.textContent = "Le nom et la fonction sont requis.";
+    errorEl.style.display = "block";
+    return;
+  }
+  try {
+    await api.addMachine({ name, function: fn, reservationType });
+    document.getElementById("modal-add-machine").classList.add("hidden");
+    await loadMachines();
+  } catch (err) {
+    errorEl.textContent = err.message || "Impossible d'ajouter cette machine.";
+    errorEl.style.display = "block";
   }
 }
 

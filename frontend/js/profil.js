@@ -4,10 +4,10 @@
    =========================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // TODO : réactiver quand le backend auth sera branché
-  // const token = localStorage.getItem("fablab_token");
-  // if (!token) { window.location.href = "login.html"; return; }
-  const token = "dev";
+  if (!localStorage.getItem("fablab_token")) {
+    window.location.href = "login.html";
+    return;
+  }
 
   await loadProfile();
 
@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     feedback.style.display = "none";
     error.style.display = "none";
     try {
-      // TODO (backend) : PATCH /api/users/me
       await api.updateMyProfile({ email: document.getElementById("email").value });
       feedback.style.display = "block";
     } catch (err) {
@@ -41,7 +40,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     try {
-      // TODO (backend) : PATCH /api/users/me
       await api.updateMyProfile({
         currentPassword: document.getElementById("pwd-current").value,
         newPassword: pwdNew,
@@ -57,18 +55,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadProfile() {
   try {
-    // TODO (backend) : GET /api/users/me
     const profile = await api.getMyProfile();
     document.getElementById("email").value = profile.email || "";
-    const initials = profile.email ? profile.email.slice(0, 2).toUpperCase() : "--";
-
-    // Gère les deux layouts (client : user-name/user-initials, commerçant : shop-name-sidebar/shop-initials)
-    const nameEl = document.getElementById("user-name") || document.getElementById("shop-name-sidebar");
-    const initialsEl = document.getElementById("user-initials") || document.getElementById("shop-initials");
-    const initialsElMob = document.getElementById("user-initials-mobile") || document.getElementById("shop-initials-mobile");
-    if (nameEl) nameEl.textContent = profile.email;
-    if (initialsEl) initialsEl.textContent = initials;
-    if (initialsElMob) initialsElMob.textContent = initials;
   } catch {
     const emailEl = document.getElementById("email");
     if (emailEl) emailEl.placeholder = "Impossible de charger le profil";

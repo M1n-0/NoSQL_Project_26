@@ -43,7 +43,6 @@
       <div class="grid">
         <div class="card">
           <div class="section-title">Occupation en temps réel</div>
-          <!-- TODO (backend) : GET /api/shops/me/occupancy -->
           <div id="occupancy-zone">
             <div class="empty-state"><div class="ic">⬚</div>Chargement...</div>
           </div>
@@ -52,8 +51,9 @@
         <div class="card">
           <div class="section-title">Paramètres rapides</div>
           <form id="shop-settings-form">
-            <div class="field"><label>Capacité maximale</label><input id="setting-capacity" value=""></div>
-            <div class="field"><label>Horaires</label><input id="setting-hours" value=""></div>
+            <div class="field"><label>Capacité maximale</label><input id="setting-capacity" type="number" min="1" value=""></div>
+            <div class="field"><label>Heure d'ouverture</label><input id="setting-open-time" type="time" value=""></div>
+            <div class="field"><label>Heure de fermeture</label><input id="setting-close-time" type="time" value=""></div>
             <div class="field" style="margin-bottom:10px;"><label>Contact</label><input id="setting-contact" value=""></div>
             <button type="submit" class="btn btn-soft btn-sm">Enregistrer</button>
           </form>
@@ -61,7 +61,6 @@
       </div>
 
       <div class="section-title">Machines</div>
-      <!-- TODO (backend) : GET /api/machines/me -->
       <div id="machines-zone">
         <div class="empty-state card"><div class="ic">🔧</div>Chargement des machines...</div>
       </div>
@@ -76,7 +75,35 @@
   </div>
 </div>
 
+<!-- Modale ajout de machine -->
+<div class="modal-overlay hidden" id="modal-add-machine">
+  <div class="modal">
+    <h2>Ajouter une machine</h2>
+    <div class="field">
+      <label for="machine-name">Nom de la machine</label>
+      <input type="text" id="machine-name" placeholder="Ex : Imprimante 3D BIBI" required>
+    </div>
+    <div class="field">
+      <label for="machine-function">Fonction</label>
+      <input type="text" id="machine-function" placeholder="Ex : Impression 3D FDM" required>
+    </div>
+    <div class="field" style="margin-bottom:10px;">
+      <label>Type de réservation</label>
+      <select id="machine-reservation-type" class="select-field">
+        <option value="instantanee">Instantanée (ex : imprimante 3D)</option>
+        <option value="creneau">Sur créneau (ex : poste à souder)</option>
+      </select>
+    </div>
+    <div id="machine-error" style="font-size:13px;color:var(--danger);display:none;margin-top:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-machine-cancel">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="btn-machine-submit">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/api.js"></script>
+<script src="../js/session.js"></script>
 <script src="../js/commercant.js"></script>
 </body>
 </html>

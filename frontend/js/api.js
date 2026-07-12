@@ -78,6 +78,11 @@ const api = {
 
   // --- Historique commerçant ---
   getMerchantHistory: () => apiRequest("/reservations/shop/history"),
+  updateReservationStatus: (reservationId, status) =>
+    apiRequest(`/reservations/${reservationId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 
   // --- Admin : comptes ---
   adminGetUsers: (role) => apiRequest(`/admin/users${role ? `?role=${encodeURIComponent(role)}` : ""}`),
@@ -97,3 +102,13 @@ const api = {
   adminLinkShop: (shopId, data) =>
     apiRequest(`/admin/shops/${shopId}/link`, { method: "POST", body: JSON.stringify(data) }),
 };
+
+// Formate une date ISO (ex: "2026-07-07T12:25:07.000Z") en date/heure lisible (ex: "07/07/2026 12h25").
+function formatDate(isoString) {
+  if (!isoString) return "-";
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) return isoString;
+  const date = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const time = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }).replace(":", "h");
+  return `${date} ${time}`;
+}
